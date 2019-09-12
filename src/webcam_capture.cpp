@@ -20,7 +20,7 @@ const extern void *save;
 void StopContCapture(int sig_id)
 {
     UNUSED(sig_id);
-	printf("\nstoping continuous capture\n");
+	printf("\nstopping continuous capture\n");
     goon = 1;
 }
 
@@ -110,7 +110,7 @@ int stop_record(int fd)
 
 int capture(void)
 {
-    int fd = open("/dev/video2", O_RDWR);
+    int fd = open("/dev/video0", O_RDWR);
     struct buffer *buffers = NULL;
     int n = init_all(fd, buffers);
     int max_name_len = snprintf(NULL,0,continuousFilenameFmt,jpegFilename,UINT32_MAX,INT64_MAX);

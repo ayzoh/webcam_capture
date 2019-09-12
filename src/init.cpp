@@ -88,7 +88,7 @@ int init_buffers(int fd, struct buffer *buffers)
         perror("Could not request buffer from device, VIDIOC_REQBUFS");
         exit(0);
     }
-    buffers = (struct buffer *) calloc(requestBuffer.count, sizeof(buffer));
+    buffers = (struct buffer*)calloc(requestBuffer.count, sizeof(buffer));
 	for (buffers->n_buffers = 0; buffers->n_buffers < requestBuffer.count; ++buffers->n_buffers) {
         v4l2_buffer queryBuffer = {0};
         CLEAR(queryBuffer);
