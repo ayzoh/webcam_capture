@@ -7,8 +7,6 @@
 
 #include "functions.h"
 #include "webcam.h"
-// #include <Magick++.h>
-// using namespace Magick;
 
 using namespace std;
 

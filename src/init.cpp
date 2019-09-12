@@ -15,12 +15,12 @@ static unsigned int fps = 30;
 
 int xioctl(int fd, long unsigned int request, void* argp)
 {
-	int r;
+    int r;
 
-	do r = v4l2_ioctl(fd, request, argp);
-	while (-1 == r && EINTR == errno);
+    do r = v4l2_ioctl(fd, request, argp);
+    while (-1 == r && EINTR == errno);
 
-	return r;
+    return r;
 }
 
 int check_capabilities(int fd)
@@ -47,7 +47,7 @@ int init_fps(int fd)
     frameint.parm.capture.timeperframe.numerator = 1;
     frameint.parm.capture.timeperframe.denominator = fps;
     if (-1 == xioctl(fd, VIDIOC_S_PARM, &frameint)) 
-      fprintf(stderr,"Unable to set frame interval.\n");
+        fprintf(stderr,"Unable to set frame interval.\n");
     return (0);
 }
 
@@ -55,7 +55,7 @@ int init_format(int fd)
 {
     v4l2_format imageFormat = {0};
     v4l2_cropcap cropcap = {0};
-	v4l2_crop crop = {0};
+    v4l2_crop crop = {0};
 
     CLEAR(imageFormat);
     imageFormat.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
@@ -68,10 +68,10 @@ int init_format(int fd)
         return (1);
     }
     CLEAR(cropcap);
-	cropcap.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
-	if (0 == xioctl(fd, VIDIOC_CROPCAP, &cropcap)) {
-		crop.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
-		crop.c = cropcap.defrect;
+    cropcap.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+    if (0 == xioctl(fd, VIDIOC_CROPCAP, &cropcap)) {
+        crop.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+        crop.c = cropcap.defrect;
     }
     return (0);
 }
@@ -89,7 +89,7 @@ int init_buffers(int fd, struct buffer *buffers)
         exit(0);
     }
     buffers = (struct buffer*)calloc(requestBuffer.count, sizeof(buffer));
-	for (buffers->n_buffers = 0; buffers->n_buffers < requestBuffer.count; ++buffers->n_buffers) {
+    for (buffers->n_buffers = 0; buffers->n_buffers < requestBuffer.count; ++buffers->n_buffers) {
         v4l2_buffer queryBuffer = {0};
         CLEAR(queryBuffer);
         queryBuffer.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
@@ -99,8 +99,8 @@ int init_buffers(int fd, struct buffer *buffers)
             perror("Device did not return the buffer information, VIDIOC_QUERYBUF");
             exit(0);
         }
-		buffers[buffers->n_buffers].length = queryBuffer.length;
-		buffers[buffers->n_buffers].start = v4l2_mmap(NULL, queryBuffer.length, PROT_READ | PROT_WRITE, MAP_SHARED, fd, queryBuffer.m.offset);
+        buffers[buffers->n_buffers].length = queryBuffer.length;
+        buffers[buffers->n_buffers].start = v4l2_mmap(NULL, queryBuffer.length, PROT_READ | PROT_WRITE, MAP_SHARED, fd, queryBuffer.m.offset);
         save = malloc(sizeof(buffers->start));
     }
     save = buffers->start;

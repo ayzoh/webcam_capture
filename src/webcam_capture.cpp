@@ -20,17 +20,17 @@ const extern void *save;
 void StopContCapture(int sig_id)
 {
     UNUSED(sig_id);
-	printf("\nstopping continuous capture\n");
+    printf("\nstopping continuous capture\n");
     goon = 1;
 }
 
 void InstallSIGINTHandler()
 {
-	struct sigaction sa;
-	CLEAR(sa);
-	sa.sa_handler = StopContCapture;
-	if (sigaction(SIGINT, &sa, 0) != 0)
-		fprintf(stderr,"could not install SIGINT handler, continuous capture disabled");
+    struct sigaction sa;
+    CLEAR(sa);
+    sa.sa_handler = StopContCapture;
+    if (sigaction(SIGINT, &sa, 0) != 0)
+        fprintf(stderr,"could not install SIGINT handler, continuous capture disabled");
 }
 
 static int frameRead(int fd)
@@ -39,15 +39,15 @@ static int frameRead(int fd)
     ofstream outFile;
     string base(".jpeg");
 
-	CLEAR(buf);
+    CLEAR(buf);
     buf.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
     buf.memory = V4L2_MEMORY_MMAP;
     if (-1 == xioctl(fd, VIDIOC_DQBUF, &buf)) {
         switch (errno) {
-            case EAGAIN:
-                return 0;
-            default:
-                perror("VIDIOC_DQBUF");
+        case EAGAIN:
+            return 0;
+        default:
+            perror("VIDIOC_DQBUF");
         }
     }
     struct timeval timestamp = buf.timestamp;
@@ -65,7 +65,7 @@ static int frameRead(int fd)
 
 int record_loop(int fd)
 {
-    std::cout<<"Capturing.. Press Ctr+C to exit"<<std::endl;
+    std::cout<<"Capturing.. Press Ctrl+C to exit"<<std::endl;
     for (;goon == 0;) {
         if (frameRead(fd))
             break;
@@ -79,7 +79,7 @@ int record_loop(int fd)
 int start_capture(int fd, int n)
 {
     int i = 0;
-	enum v4l2_buf_type type;
+    enum v4l2_buf_type type;
 
     for (; i < n; ++i) {
         struct v4l2_buffer buf;
