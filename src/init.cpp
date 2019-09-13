@@ -15,12 +15,13 @@ static unsigned int fps = 30;
 
 int xioctl(int fd, long unsigned int request, void* argp)
 {
-    int r;
+    //system call to control device according to the request
+    int r = 0;
 
     do r = v4l2_ioctl(fd, request, argp);
     while (-1 == r && EINTR == errno);
 
-    return r;
+    return (r);
 }
 
 int check_capabilities(int fd)
@@ -88,7 +89,6 @@ int init_buffers(int fd, struct buffer *buffers)
         perror("Could not request buffer from device, VIDIOC_REQBUFS");
         exit(0);
     }
-    buffers = (struct buffer*)calloc(requestBuffer.count, sizeof(buffer));
     for (buffers->n_buffers = 0; buffers->n_buffers < requestBuffer.count; ++buffers->n_buffers) {
         v4l2_buffer queryBuffer = {0};
         CLEAR(queryBuffer);
@@ -101,7 +101,6 @@ int init_buffers(int fd, struct buffer *buffers)
         }
         buffers[buffers->n_buffers].length = queryBuffer.length;
         buffers[buffers->n_buffers].start = v4l2_mmap(NULL, queryBuffer.length, PROT_READ | PROT_WRITE, MAP_SHARED, fd, queryBuffer.m.offset);
-        save = malloc(sizeof(buffers->start));
     }
     save = buffers->start;
     return (buffers->n_buffers);
@@ -109,16 +108,20 @@ int init_buffers(int fd, struct buffer *buffers)
 
 int init_all(int fd, struct buffer *buffers)
 {
-    int i = 0;
+    int n_buffer = 0;
 
+    //check if camera can record
     if (check_capabilities(fd) != 0)
         return (-1);
+    //initialize the capture format of the webcam
     if (init_format(fd) != 0)
         return (-1);
+    //initialize the fps option (not implemented yet)
     if (init_fps(fd) != 0)
         return (-1);
-    i = init_buffers(fd, buffers);
-    if (i == 0)
+    //initialize the capture buffers and return the nbr of buffers
+    n_buffer = init_buffers(fd, buffers);
+    if (n_buffer <= 0)
         return (-1);
-    return (i);
+    return (n_buffer);
 }

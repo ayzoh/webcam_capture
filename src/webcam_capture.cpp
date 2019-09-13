@@ -14,7 +14,7 @@ int goon = 0;
 char name[11] = "img/webcam";
 static char* jpegFilename = name;
 static char* jpegFilenamePart = NULL;
-static const char* const continuousFilenameFmt = "%s_%010"PRIu32"_%"PRId64".jpeg";
+static const char* const FilenameFmt = "%s_%010"PRIu32"_%"PRId64".jpeg";
 const extern void *save;
 
 void StopContCapture(int sig_id)
@@ -37,7 +37,6 @@ static int frameRead(int fd)
 {
     v4l2_buffer buf = {0};
     ofstream outFile;
-    string base(".jpeg");
 
     CLEAR(buf);
     buf.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
@@ -54,7 +53,7 @@ static int frameRead(int fd)
     static uint32_t img_ind = 0;
     int64_t timestamp_long;
     timestamp_long = timestamp.tv_sec*1e6 +  timestamp.tv_usec;
-    sprintf(jpegFilename,continuousFilenameFmt,jpegFilenamePart,img_ind++,timestamp_long);
+    sprintf(jpegFilename,FilenameFmt,jpegFilenamePart,img_ind++,timestamp_long);
     outFile.open(jpegFilename);
     outFile.write((char*)save, (double)buf.bytesused);
     outFile.close();
@@ -110,23 +109,29 @@ int stop_record(int fd)
 
 int capture(void)
 {
-    int fd = open("/dev/video0", O_RDWR);
+    int fd = open("/dev/video2", O_RDWR);
     struct buffer *buffers = NULL;
+    buffers = (struct buffer*)calloc(1, sizeof(buffer));
     int n = init_all(fd, buffers);
-    int max_name_len = snprintf(NULL,0,continuousFilenameFmt,jpegFilename,UINT32_MAX,INT64_MAX);
+    int max_name_len = snprintf(NULL,0,FilenameFmt,jpegFilename,UINT32_MAX,INT64_MAX);
     jpegFilenamePart = jpegFilename;
     jpegFilename = (char *)calloc(max_name_len+1,sizeof(char));
     strcpy(jpegFilename,jpegFilenamePart);
 
+    //initialize the stop signal SIGINT to stop the record loop without buffering stdin
     InstallSIGINTHandler();
+    //turn on the webcam if the buffers exists
     if (start_capture(fd, n) != 0)
         return (1);
+    //start the record loop while goon == 0 and process each frames
     if (record_loop(fd) != 0)
         return (1);
+    //stop the record if ctrl+c (SIGINT) is pressed
     if (stop_record(fd) != 0)
         return (0);
     if (jpegFilename != 0)
         free(jpegFilename);
+    free(buffers);
     close(fd);
     return (0);
 }
