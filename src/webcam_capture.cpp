@@ -112,7 +112,9 @@ int capture(void)
     int fd = open("/dev/video2", O_RDWR);
     struct buffer *buffers = NULL;
     buffers = (struct buffer*)calloc(1, sizeof(buffer));
-    int n = init_all(fd, buffers);
+    //do checks and init buffers, format | return nbr buffers
+    int nbr_buffers = init_all(fd, buffers);
+    //get size of malloc for the file name .jpeg
     int max_name_len = snprintf(NULL,0,FilenameFmt,jpegFilename,UINT32_MAX,INT64_MAX);
     jpegFilenamePart = jpegFilename;
     jpegFilename = (char *)calloc(max_name_len+1,sizeof(char));
@@ -121,7 +123,7 @@ int capture(void)
     //initialize the stop signal SIGINT to stop the record loop without buffering stdin
     InstallSIGINTHandler();
     //turn on the webcam if the buffers exists
-    if (start_capture(fd, n) != 0)
+    if (start_capture(fd, nbr_buffers) != 0)
         return (1);
     //start the record loop while goon == 0 and process each frames
     if (record_loop(fd) != 0)

@@ -30,6 +30,7 @@ clean:
 		${RM} ${PROGS} ${OBJS} *.o *~.
 
 fclean:	clean
+	rm img/*.pgm
 	rm img/*.jpeg
 	rm exec_cpp
 
