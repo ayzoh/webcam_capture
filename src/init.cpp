@@ -28,10 +28,12 @@ int check_capabilities(int fd)
 {
     v4l2_capability cap = {0};
 
+    //check if a camera has been opened on /dev/video*
     if (fd < 0) {
         perror("Failed to open device, OPEN");
         return (1);
     }
+    //check the camera capabilities
     if (xioctl(fd, VIDIOC_QUERYCAP, &cap) < 0) {
         perror("Failed to get device capabilities, VIDIOC_QUERYCAP");
         return (1);
@@ -43,7 +45,8 @@ int init_fps(int fd)
 {
     v4l2_streamparm frameint = {0};
 
-    CLEAR(frameint);    
+    //init_fps option (not implemented yet)
+    CLEAR(frameint);
     frameint.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
     frameint.parm.capture.timeperframe.numerator = 1;
     frameint.parm.capture.timeperframe.denominator = fps;
@@ -58,6 +61,7 @@ int init_format(int fd)
     v4l2_cropcap cropcap = {0};
     v4l2_crop crop = {0};
 
+    //init record format
     CLEAR(imageFormat);
     imageFormat.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
     imageFormat.fmt.pix.width = 400;
@@ -68,6 +72,7 @@ int init_format(int fd)
         perror("Device could not set format, VIDIOC_S_FMT");
         return (1);
     }
+    //information about cropping and scaling abilities
     CLEAR(cropcap);
     cropcap.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
     if (0 == xioctl(fd, VIDIOC_CROPCAP, &cropcap)) {
@@ -81,6 +86,7 @@ int init_buffers(int fd, struct buffer *buffers)
 {
     v4l2_requestbuffers requestBuffer = {0};
 
+    //request a memory mapping buffer
     CLEAR(requestBuffer);
     requestBuffer.count = 1;
     requestBuffer.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
@@ -89,6 +95,7 @@ int init_buffers(int fd, struct buffer *buffers)
         perror("Could not request buffer from device, VIDIOC_REQBUFS");
         exit(0);
     }
+    //fill a memory mapping buffer with empty storage
     for (buffers->n_buffers = 0; buffers->n_buffers < requestBuffer.count; ++buffers->n_buffers) {
         v4l2_buffer queryBuffer = {0};
         CLEAR(queryBuffer);

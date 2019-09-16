@@ -49,11 +49,13 @@ static int frameRead(int fd)
             perror("VIDIOC_DQBUF");
         }
     }
+    //init timeval struct for .jpeg name update
     struct timeval timestamp = buf.timestamp;
     static uint32_t img_ind = 0;
     int64_t timestamp_long;
     timestamp_long = timestamp.tv_sec*1e6 +  timestamp.tv_usec;
     sprintf(jpegFilename,FilenameFmt,jpegFilenamePart,img_ind++,timestamp_long);
+    //write in .jpeg (open create the .jpeg, write fill it, and close)
     outFile.open(jpegFilename);
     outFile.write((char*)save, (double)buf.bytesused);
     outFile.close();
@@ -66,9 +68,9 @@ int record_loop(int fd)
 {
     std::cout<<"Capturing.. Press Ctrl+C to exit"<<std::endl;
     for (;goon == 0;) {
-        if (frameRead(fd))
-            break;
         if (goon == 1)
+            break;
+        if (frameRead(fd))
             break;
         goon = 0;
     }
@@ -80,6 +82,7 @@ int start_capture(int fd, int n)
     int i = 0;
     enum v4l2_buf_type type;
 
+    //start capture for n_buffers
     for (; i < n; ++i) {
         struct v4l2_buffer buf;
         CLEAR(buf);
@@ -99,6 +102,7 @@ int stop_record(int fd)
 {
     v4l2_buf_type type;
 
+    //stop streaming when SIGINT
     type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
     if (xioctl(fd, VIDIOC_STREAMOFF, &type) < 0) {
         perror("Could not end streaming, VIDIOC_STREAMOFF");
@@ -114,6 +118,8 @@ int capture(void)
     buffers = (struct buffer*)calloc(1, sizeof(buffer));
     //do checks and init buffers, format | return nbr buffers
     int nbr_buffers = init_all(fd, buffers);
+    if (nbr_buffers < 0)
+        return (1);
     //get size of malloc for the file name .jpeg
     int max_name_len = snprintf(NULL,0,FilenameFmt,jpegFilename,UINT32_MAX,INT64_MAX);
     jpegFilenamePart = jpegFilename;
@@ -130,7 +136,8 @@ int capture(void)
         return (1);
     //stop the record if ctrl+c (SIGINT) is pressed
     if (stop_record(fd) != 0)
-        return (0);
+        return (1);
+    //free all
     if (jpegFilename != 0)
         free(jpegFilename);
     free(buffers);
