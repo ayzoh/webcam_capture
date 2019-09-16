@@ -93,7 +93,7 @@ int init_buffers(int fd, struct buffer *buffers)
     requestBuffer.memory = V4L2_MEMORY_MMAP;
     if (xioctl(fd, VIDIOC_REQBUFS, &requestBuffer) < 0) {
         perror("Could not request buffer from device, VIDIOC_REQBUFS");
-        exit(0);
+        return(-1);
     }
     //fill a memory mapping buffer with empty storage
     for (buffers->n_buffers = 0; buffers->n_buffers < requestBuffer.count; ++buffers->n_buffers) {
@@ -104,7 +104,7 @@ int init_buffers(int fd, struct buffer *buffers)
         queryBuffer.index = buffers->n_buffers;
         if (xioctl(fd, VIDIOC_QUERYBUF, &queryBuffer) < 0) {
             perror("Device did not return the buffer information, VIDIOC_QUERYBUF");
-            exit(0);
+            return(-1);
         }
         buffers[buffers->n_buffers].length = queryBuffer.length;
         buffers[buffers->n_buffers].start = v4l2_mmap(NULL, queryBuffer.length, PROT_READ | PROT_WRITE, MAP_SHARED, fd, queryBuffer.m.offset);
@@ -124,8 +124,7 @@ int init_all(int fd, struct buffer *buffers)
     if (init_format(fd) != 0)
         return (-1);
     //initialize the fps option (not implemented yet)
-    if (init_fps(fd) != 0)
-        return (-1);
+    init_fps(fd);
     //initialize the capture buffers and return the nbr of buffers
     n_buffer = init_buffers(fd, buffers);
     if (n_buffer <= 0)

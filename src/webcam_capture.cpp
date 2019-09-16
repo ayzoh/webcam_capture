@@ -68,9 +68,9 @@ int record_loop(int fd)
 {
     std::cout<<"Capturing.. Press Ctrl+C to exit"<<std::endl;
     for (;goon == 0;) {
-        if (goon == 1)
-            break;
         if (frameRead(fd))
+            break;
+        if (goon == 1)
             break;
         goon = 0;
     }
@@ -89,12 +89,16 @@ int start_capture(int fd, int n)
         buf.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
         buf.memory = V4L2_MEMORY_MMAP;
         buf.index = i;
-        if (-1 == xioctl(fd, VIDIOC_QBUF, &buf))
+        if (-1 == xioctl(fd, VIDIOC_QBUF, &buf)) {
             perror("VIDIOC_QBUF");
+            return (1);
+        }
     }
     type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
-    if (-1 == xioctl(fd, VIDIOC_STREAMON, &type))
+    if (-1 == xioctl(fd, VIDIOC_STREAMON, &type)) {
         perror("VIDIOC_STREAMON");
+        return (1);
+    }
     return (0);
 }
 
