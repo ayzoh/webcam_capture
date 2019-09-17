@@ -20,7 +20,7 @@ const extern void *save;
 void StopContCapture(int sig_id)
 {
     UNUSED(sig_id);
-    printf("\nstopping continuous capture\n");
+    printf("\nStoping capture.\n");
     goon = 1;
 }
 

@@ -18,7 +18,6 @@ HEADERS = webcam.h functions.h
 MAIN = exec_cpp
 
 all: ${MAIN}
-		@echo   Simple compilter named exec_cpp has been compiled
 
 ${MAIN}: ${OBJS}
 		${CXX} ${CXXFLAGS} ${OBJS} -o ${MAIN}

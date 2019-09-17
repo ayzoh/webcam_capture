@@ -1,26 +1,31 @@
 #!/bin/bash
-make -f Makefile
-set -x
+if [ "${BASH_SOURCE[0]}" -ef "$0" ]
+then
+    echo "Usage: source ./shell.sh"
+    exit
+fi
+printf "Compiling webcam_capture files...\n"
+make --quiet -f Makefile
 ./exec_cpp
 result="$?"
-set +x
 if [ "$result" -ne 0 ]; then
-    echo "webcam_capture failed"
+    echo "Webcam_capture failed"
     return
 fi
-printf "converting /img/*.jpeg in /res/*.pgm\n"
+printf "Converting /img/*.jpeg in /res/*.pgm...\n"
 mogrify -format pgm -compress none img/*.jpeg
 cd HOG/
-make -f Makefile
-printf "converting /img/*.pgm to /res/*_histo.pgm\n"
-set -x
+printf "Compiling HOG algrorithm files...\n"
+make --quiet -f Makefile
+printf "Converting /img/*.pgm to /res/*_histo.pgm...\n"
 ./exec_cpp
 result="$?"
-set +x
 if [ "$result" -ne 0 ]; then
     echo "HOG conversion failed"
     return
 fi
-make clean
+printf "Erasing all useless files...\n"
+make --quiet clean
 cd ..
-make fclean
+make --quiet fclean
+printf "Done !\n"
