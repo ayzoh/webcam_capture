@@ -157,11 +157,4 @@ int main() {
         }
     }
     closedir(dirFile);
-    //bouclé sur tout les fichiers contenus dans /histo pour les mettre dans /res ? ? ?
-    // hog("barbara", pattern);
-    // hog("barbara-320", pattern);
-    // hog("empire", pattern);
-    // hog("groupe", pattern);
-    // hog("lena", pattern);
-    // hog("lena-320", pattern);
 }

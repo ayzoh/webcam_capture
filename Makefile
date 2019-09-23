@@ -7,13 +7,17 @@
 
 CXX = g++
 
-CXXFLAGS = -lv4l2 -ljpeg -std=c++0x -Wall -Wextra -pedantic -g -Iinclude -Wno-literal-suffix -Wunused -Wno-missing-field-initializers
+CXXFLAGS = -lv4l2 -ljpeg -std=c++0x -Wall -Wextra -pedantic -g -Iinclude -Wno-literal-suffix -Wunused -Wno-missing-field-initializers -g3
 
 SRCS =  src/main.cpp src/webcam_capture.cpp src/init.cpp
 
 OBJS = ${SRCS:.cpp=.o}
 
 HEADERS = webcam.h functions.h
+
+DOC = doxygen
+
+DOC_FILE = docs/config
 
 MAIN = exec_cpp
 
@@ -27,6 +31,10 @@ ${MAIN}: ${OBJS}
 
 clean:
 		${RM} ${PROGS} ${OBJS} *.o *~.
+
+html:
+		$(DOC) $(DOC_FILE)
+
 
 fclean:	clean
 	rm img/*.pgm

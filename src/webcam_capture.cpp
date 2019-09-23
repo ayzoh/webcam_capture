@@ -10,12 +10,25 @@
 
 using namespace std;
 
+/// Capture loop variable. Change to 1 if Ctrl+C (SIGINT) is entered 
 int goon = 0;
+/// Defined the directory and the name of the capture.
 char name[11] = "img/webcam";
+/// Final name of the capture, depend on FilenameFmt and name.
 static char* jpegFilename = name;
+/// Set to assembly and get enough space for the jpegFilename.
 static char* jpegFilenamePart = NULL;
+/// Set output format of the jpegFilename.
 static const char* const FilenameFmt = "%s_%010"PRIu32"_%"PRId64".jpeg";
+/// Saved framebuffer in init.cpp.
 const extern void *save;
+
+/**
+     *  @brief Stop capture if sig_int signal is entered.
+     * 
+     *  @param sig_id   signal ID.
+     *  @remark     pass goon variable to 1 to interrupt capture loop.
+*/
 
 void StopContCapture(int sig_id)
 {
@@ -23,6 +36,14 @@ void StopContCapture(int sig_id)
     printf("\nStoping capture.\n");
     goon = 1;
 }
+
+/**
+     *  @brief Catch sig_int signal if Ctrl+C is entered
+     *
+     *  @details
+     * Sigaction strucure interpret the incoming signal (when it catch one)
+     * and if sig_int is recognize, transmit the info to StopContCapture(SIGINT).
+*/
 
 void InstallSIGINTHandler()
 {
@@ -33,7 +54,21 @@ void InstallSIGINTHandler()
         fprintf(stderr,"could not install SIGINT handler, continuous capture disabled");
 }
 
-static int frameRead(int fd)
+/**
+     *  @brief Write in a .jpg the saved buffer(frame).
+     *
+     *  @details
+     *  the VIDIOC_DQBUF ioctl is used to dequeue a filled (capturing) or displayed
+     *  (output) buffer from the driver’s outgoing queue.\n
+     *  The ofstream variable will be the final capture frame, with the jpegFilename which have been formatted before,
+     *  thank's to timeval (time value) struct, 32 and 64 bits int, and sprintf function.\n
+     *  A new buffer is after queued for the next frame.
+     * 
+     *  @param fd   webcam file descriptor.
+     *  @return     0 if everthing's fine, 1 if not.
+*/
+
+int frameRead(int fd)
 {
     v4l2_buffer buf = {0};
     ofstream outFile;
@@ -41,12 +76,12 @@ static int frameRead(int fd)
     CLEAR(buf);
     buf.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
     buf.memory = V4L2_MEMORY_MMAP;
-    if (-1 == xioctl(fd, VIDIOC_DQBUF, &buf)) {
+    if (xioctl(fd, VIDIOC_DQBUF, &buf) == -1) {
         switch (errno) {
-        case EAGAIN:
-            return 0;
-        default:
-            perror("VIDIOC_DQBUF");
+            case EAGAIN:
+                return 0;
+            default:
+                perror("VIDIOC_DQBUF");
         }
     }
     //init timeval struct for .jpeg name update
@@ -59,10 +94,18 @@ static int frameRead(int fd)
     outFile.open(jpegFilename);
     outFile.write((char*)save, (double)buf.bytesused);
     outFile.close();
-    if (-1 == xioctl(fd, VIDIOC_QBUF, &buf))
+    if (xioctl(fd, VIDIOC_QBUF, &buf) == -1)
         perror("VIDIOC_QBUF");
     return (0);
 }
+
+/**
+     *  @brief Capture frames while Ctrl+C is not pressed.
+     * 
+     *  @param fd   webcam file descriptor.
+     *  @return     0 if everthing's fine, 1 if not.
+*/
+
 
 int record_loop(int fd)
 {
@@ -77,19 +120,30 @@ int record_loop(int fd)
     return (0);
 }
 
+/**
+     *  @brief Start camera record (VIDIOC_STREAMON).
+     *
+     *  @details
+     * Applications call the VIDIOC_QBUF ioctl to enqueue an empty (capturing)
+     * or filled (output) buffer in the driver’s incoming queue.
+     * 
+     *  @param fd   webcam file descriptor.
+     *  @param n   number of queued buffers needed.
+     *  @return     0 if everthing's fine, 1 if not.
+*/
+
 int start_capture(int fd, int n)
 {
-    int i = 0;
     enum v4l2_buf_type type;
 
     //start capture for n_buffers
-    for (; i < n; ++i) {
+    for (int index = 0; index < n; ++index) {
         struct v4l2_buffer buf;
         CLEAR(buf);
         buf.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
         buf.memory = V4L2_MEMORY_MMAP;
-        buf.index = i;
-        if (-1 == xioctl(fd, VIDIOC_QBUF, &buf)) {
+        buf.index = index;
+        if (xioctl(fd, VIDIOC_QBUF, &buf) == 1) {
             perror("VIDIOC_QBUF");
             return (1);
         }
@@ -101,6 +155,13 @@ int start_capture(int fd, int n)
     }
     return (0);
 }
+
+/**
+     *  @brief Stop camera record (VIDIOC_STREAMOFF)
+     *
+     *  @param fd   webcam file descriptor.
+     *  @return     0 if everthing's fine, 1 if not.
+*/
 
 int stop_record(int fd)
 {
@@ -115,9 +176,22 @@ int stop_record(int fd)
     return (0);
 }
 
+/**
+     *  @brief Main function of the project
+     *
+     *  @details
+     * Get the wanted file descriptor\n
+     * init: buffers, filename, signal\n
+     * check function returns of start_capture, record_loop, stop_record\n
+     * free buffers\n
+     * close fd\n
+     * 
+     *  @return 0 if everthing's fine, 1 if not.
+*/
+
 int capture(void)
 {
-    int fd = open("/dev/video2", O_RDWR);
+    int fd = open("/dev/video0", O_RDWR);
     struct buffer *buffers = NULL;
     buffers = (struct buffer*)calloc(1, sizeof(buffer));
     //do checks and init buffers, format | return nbr buffers

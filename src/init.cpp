@@ -13,16 +13,32 @@ using namespace std;
 const void *save = NULL;
 static unsigned int fps = 30;
 
+/**
+     *  @brief Do ioctl and retry if error was EINTR, same parameters as ioctl.
+     * 
+     *  @param fd   webcam file descriptor.
+     *  @param request request(VIDIOC_)
+     *  @param argp argument
+     *  @return     0 if everthing's fine, 1 if not.
+*/
+
 int xioctl(int fd, long unsigned int request, void* argp)
 {
     //system call to control device according to the request
     int r = 0;
 
     do r = v4l2_ioctl(fd, request, argp);
-    while (-1 == r && EINTR == errno);
+    while (r == -1 && EINTR == errno);
 
     return (r);
 }
+
+/**
+     *  @brief Check if there is a camera and if it can record
+     * 
+     *  @param fd   webcam file descriptor.
+     *  @return     0 if everthing's fine, 1 if not.
+*/
 
 int check_capabilities(int fd)
 {
@@ -41,19 +57,33 @@ int check_capabilities(int fd)
     return (0);
 }
 
+/**
+     *  @brief Initialize fps option (not implemented yet)
+     * 
+     *  @param fd   webcam file descriptor.
+     *  @return     0 if everthing's fine, 1 if not.
+*/
+
+
 int init_fps(int fd)
 {
     v4l2_streamparm frameint = {0};
 
-    //init_fps option (not implemented yet)
     CLEAR(frameint);
     frameint.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
     frameint.parm.capture.timeperframe.numerator = 1;
     frameint.parm.capture.timeperframe.denominator = fps;
-    if (-1 == xioctl(fd, VIDIOC_S_PARM, &frameint)) 
+    if (xioctl(fd, VIDIOC_S_PARM, &frameint) == -1) 
         fprintf(stderr,"Unable to set frame interval.\n");
     return (0);
 }
+
+/**
+     *  @brief Initialize capture format of the selected camera
+     * 
+     *  @param fd   webcam file descriptor.
+     *  @return     0 if everthing's fine, 1 if not.
+*/
 
 int init_format(int fd)
 {
@@ -75,12 +105,21 @@ int init_format(int fd)
     //information about cropping and scaling abilities
     CLEAR(cropcap);
     cropcap.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
-    if (0 == xioctl(fd, VIDIOC_CROPCAP, &cropcap)) {
+    if (xioctl(fd, VIDIOC_CROPCAP, &cropcap) == 0) {
         crop.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
         crop.c = cropcap.defrect;
     }
     return (0);
 }
+
+/**
+     *  @brief Request and initialize buffers
+     * 
+     *  @param fd   webcam file descriptor.
+     *  @param *buffers pointer on buffer structure
+     *  @return    number of buffers if everthing's fine, -1 if not.
+*/
+
 
 int init_buffers(int fd, struct buffer *buffers)
 {
@@ -112,6 +151,14 @@ int init_buffers(int fd, struct buffer *buffers)
     save = buffers->start;
     return (buffers->n_buffers);
 }
+
+/**
+     *  @brief Global initialize function (check functions return)
+     * 
+     *  @param fd   webcam file descriptor.
+     *  @param *buffers pointer on buffer structure
+     *  @return    number of buffers if everthing's fine, -1 if not.
+*/
 
 int init_all(int fd, struct buffer *buffers)
 {
