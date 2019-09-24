@@ -26,9 +26,6 @@ all: ${MAIN}
 ${MAIN}:
 		${CXX} ${CXXFLAGS} -O2 -o ${MAIN} ${SRCS} `Magick++-config --ldflags --libs`
 
-# .cpp.o:
-# 		${CXX} ${CXXFLAGS} -O2  $<  $@
-
 clean:
 		${RM} ${PROGS} ${OBJS} *.o *~.
 
