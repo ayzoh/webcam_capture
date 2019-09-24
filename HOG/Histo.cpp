@@ -6,7 +6,7 @@ using namespace std;
 Histo::Histo(int width, int height, int image[])
         :m_width(width), m_height(height), m_histo_width(width/CELL_SIZE), m_histo_height(height/CELL_SIZE), m_img(Image(m_width, m_height, image))
 {
-    // Supprimer le if pour la synthèse
+    // Supprimer le if pour la synthï¿½se
     if (m_width%CELL_SIZE!=0 || m_height%CELL_SIZE!=0) {
         cout << "Taille non divisible par " << CELL_SIZE << endl;
         exit(1);
@@ -59,9 +59,9 @@ void Histo::affiche_ascii()
 
 void Histo::affiche_graphique(string nom, int pattern[N_CLASSES][CELL_SIZE*CELL_SIZE])
 {
-    ofstream fichier_out(("../res/"+nom+"_histo.pgm").c_str(), ios::out);
+    ofstream fichier_out(("res/"+nom+"_histo.pgm").c_str(), ios::out);
     if(!fichier_out) {
-        cerr << "ça marche pas" << endl;
+        cerr << "ï¿½a marche pas" << endl;
         exit(1);
     }
 

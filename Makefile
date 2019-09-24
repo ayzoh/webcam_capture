@@ -5,15 +5,15 @@
 ## webcam
 ##
 
-CXX = g++
+CXX = c++ `Magick++-config --cxxflags --cppflags`
 
-CXXFLAGS = -lv4l2 -ljpeg -std=c++0x -Wall -Wextra -pedantic -g -Iinclude -Wno-literal-suffix -Wunused -Wno-missing-field-initializers -g3
+CXXFLAGS = -lv4l2 -std=c++0x -Wall -Wextra -pedantic -Iinclude -Wno-literal-suffix -Wunused -Wno-missing-field-initializers -g3
 
-SRCS =  src/main.cpp src/webcam_capture.cpp src/init.cpp
+SRCS =  src/main.cpp src/webcam_capture.cpp src/init.cpp HOG/HOG.cpp HOG/Affine.cpp HOG/Histo.cpp HOG/Image.cpp
 
 OBJS = ${SRCS:.cpp=.o}
 
-HEADERS = webcam.h functions.h
+HEADERS = webcam.h functions.h HOG/Affine.h HOG/Image.h HOG/HOG_Parameters.h HOG/Histo.h
 
 DOC = doxygen
 
@@ -23,11 +23,11 @@ MAIN = exec_cpp
 
 all: ${MAIN}
 
-${MAIN}: ${OBJS}
-		${CXX} ${CXXFLAGS} ${OBJS} -o ${MAIN}
+${MAIN}:
+		${CXX} ${CXXFLAGS} -O2 -o ${MAIN} ${SRCS} `Magick++-config --ldflags --libs`
 
-.cpp.o:
-		${CXX} ${CXXFLAGS} -c $< -o $@
+# .cpp.o:
+# 		${CXX} ${CXXFLAGS} -O2  $<  $@
 
 clean:
 		${RM} ${PROGS} ${OBJS} *.o *~.
@@ -38,7 +38,6 @@ html:
 
 fclean:	clean
 	rm img/*.pgm
-	rm img/*.jpeg
 	rm exec_cpp
 
 re: fclean all

@@ -7,8 +7,10 @@
 
 #include "webcam.h"
 #include "functions.h"
+#include <Magick++.h>
 
 using namespace std;
+using namespace Magick;
 
 /// Capture loop variable. Change to 1 if Ctrl+C (SIGINT) is entered 
 int goon = 0;
@@ -19,7 +21,7 @@ static char* jpegFilename = name;
 /// Set to assembly and get enough space for the jpegFilename.
 static char* jpegFilenamePart = NULL;
 /// Set output format of the jpegFilename.
-static const char* const FilenameFmt = "%s_%010"PRIu32"_%"PRId64".jpeg";
+static const char* const FilenameFmt = "%s_%010"PRIu32"_%"PRId64".pgm";
 /// Saved framebuffer in init.cpp.
 const extern void *save;
 
@@ -72,6 +74,7 @@ int frameRead(int fd)
 {
     v4l2_buffer buf = {0};
     ofstream outFile;
+    Image image;
 
     CLEAR(buf);
     buf.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
@@ -94,8 +97,14 @@ int frameRead(int fd)
     outFile.open(jpegFilename);
     outFile.write((char*)save, (double)buf.bytesused);
     outFile.close();
+    //compress .pgm in the ascii form
+    image.read(jpegFilename);
+    image.compressType(CompressionType(NoCompression));
+    image.write(jpegFilename);
+    start_hog(jpegFilename);
     if (xioctl(fd, VIDIOC_QBUF, &buf) == -1)
         perror("VIDIOC_QBUF");
+    sleep(1);
     return (0);
 }
 
@@ -191,7 +200,7 @@ int stop_record(int fd)
 
 int capture(void)
 {
-    int fd = open("/dev/video0", O_RDWR);
+    int fd = open("/dev/video2", O_RDWR);
     struct buffer *buffers = NULL;
     buffers = (struct buffer*)calloc(1, sizeof(buffer));
     //do checks and init buffers, format | return nbr buffers

@@ -64,9 +64,9 @@ int Affine::inverse(int x)
 
 void Affine::writeRacine()
 {
-    ofstream fichier_out("affine/racine.txt", ios::out);
+    ofstream fichier_out("HOG/affine/racine.txt", ios::out);
     if(!fichier_out) {
-        cerr << "ça marche pas" << endl;
+        cerr << "ï¿½a marche pas" << endl;
         exit(1);
     }
 
@@ -84,9 +84,9 @@ void Affine::writeRacine()
 
 void Affine::writeArctangeante(int precision)
 {
-    ofstream fichier_out("affine/arctangeante.txt", ios::out);
+    ofstream fichier_out("HOG/affine/arctangeante.txt", ios::out);
     if(!fichier_out) {
-        cerr << "ça marche pas" << endl;
+        cerr << "ï¿½a marche pas" << endl;
         exit(1);
     }
     double incr = M_PI/(N_CLASSES);
@@ -104,9 +104,9 @@ void Affine::writeArctangeante(int precision)
 
 void Affine::writeInverse()
 {
-    ofstream fichier_out("affine/inverse.txt", ios::out);
+    ofstream fichier_out("HOG/affine/inverse.txt", ios::out);
     if(!fichier_out) {
-        cerr << "ça marche pas" << endl;
+        cerr << "ï¿½a marche pas" << endl;
         exit(1);
     }
     for (int i = 1; i < 256; i++) {
@@ -118,9 +118,9 @@ void Affine::writeInverse()
 
 void Affine::readRacine()
 {
-    ifstream fichier_in("affine/racine.txt", ios::in);
+    ifstream fichier_in("HOG/affine/racine.txt", ios::in);
     if(!fichier_in) {
-        cerr << "ça marche pas" << endl;
+        cerr << "ï¿½a marche pas" << endl;
         exit(1);
     }
 
@@ -134,9 +134,9 @@ void Affine::readRacine()
 
 void Affine::readArctangeante()
 {
-    ifstream fichier_in("affine/arctangeante.txt", ios::in);
+    ifstream fichier_in("HOG/affine/arctangeante.txt", ios::in);
     if(!fichier_in) {
-        cerr << "ça marche pas" << endl;
+        cerr << "ï¿½a marche pas" << endl;
         exit(1);
     }
 
@@ -150,9 +150,9 @@ void Affine::readArctangeante()
 
 void Affine::readInverse()
 {
-    ifstream fichier_in("affine/inverse.txt", ios::in);
+    ifstream fichier_in("HOG/affine/inverse.txt", ios::in);
     if(!fichier_in) {
-        cerr << "ça marche pas" << endl;
+        cerr << "ï¿½a marche pas" << endl;
         exit(1);
     }
 

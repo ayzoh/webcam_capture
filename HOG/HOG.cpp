@@ -18,7 +18,7 @@ void hog(string nom_fichier, int pattern[N_CLASSES][CELL_SIZE*CELL_SIZE])
     int i;
 
     // Lecture image
-    ifstream fichier(("../img/"+nom_fichier+".pgm").c_str(), ios::in);
+    ifstream fichier(("img/"+nom_fichier+".pgm").c_str(), ios::in);
     if(!fichier) {
         cerr << "�a marche pas" << endl;
     }
@@ -100,7 +100,8 @@ void precision_inverse()
     cout << "Precision inverse : " << setw(3) << 100 - (100*compare/cpt) << "%" << endl;
 }
 
-int main() {
+int start_hog(char *filename) 
+{
 
     //A d�commenter pour visualiser la comparaison des r�sultats de
     //l'approximation lin�aire :
@@ -113,12 +114,14 @@ int main() {
     string magic_number;
     int header;
     int pattern[N_CLASSES][CELL_SIZE*CELL_SIZE];
+    printf("%s\n", filename);
+
     for(int k = 0; k < N_CLASSES; k++) {
         stringstream ks;
         ks << k; 
-        ifstream fichier(("histo/"+ks.str()+".pgm").c_str(), ios::in | ios::binary);
+        ifstream fichier(("HOG/histo/"+ks.str()+".pgm").c_str(), ios::in | ios::binary);
         if(!fichier)
-            cerr << "�a marche pas" << endl;
+            cerr << "�a mache pas" << endl;
         fichier >> magic_number >> header >> header >> header;
         int i = 0;
         unsigned char buffer;
@@ -142,19 +145,14 @@ int main() {
 
     //fichiers trait�s ajout�s ou supprim�s si necesaire (les fichiers doivent
     //etre contenus dans ../img
-    DIR* dirFile = opendir("../img/");
-    if (dirFile) {
-        struct dirent *jfile;
-        while ((jfile = readdir(dirFile)) != NULL) {
-            if (!strcmp(jfile->d_name, ".") || !strcmp(jfile->d_name, ".."))
-                continue;
-            if (strstr(jfile->d_name, ".pgm")) {
-                char *dot = strchr(jfile->d_name, '.');
-                if (dot != NULL)
-                    *dot = '\0';
-                hog(jfile->d_name, pattern);
-            }
-        }
+        printf("%s\n", filename);
+    if (strstr(filename, ".pgm")) {
+        char *dot = strchr(filename, '.');
+        if (dot != NULL)
+            *dot = '\0';
+        char *adot = strchr(filename, '/');
+        if (adot != NULL)
+            hog(adot + 1, pattern);
     }
-    closedir(dirFile);
+    return (0);
 }
