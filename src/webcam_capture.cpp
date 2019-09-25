@@ -57,14 +57,12 @@ void InstallSIGINTHandler()
 }
 
 /**
-     *  @brief Write in a .jpg the saved buffer(frame).
+     *  @brief Write in a .pgm the saved buffer (frame) every seconds.
      *
      *  @details
      *  the VIDIOC_DQBUF ioctl is used to dequeue a filled (capturing) or displayed
      *  (output) buffer from the driver’s outgoing queue.\n
-     *  The ofstream variable will be the final capture frame, with the jpegFilename which have been formatted before,
-     *  thank's to timeval (time value) struct, 32 and 64 bits int, and sprintf function.\n
-     *  A new buffer is after queued for the next frame.
+     *  The ofstream file is the jpg, that will be transformed in .pgm thank's to magick++ library
      * 
      *  @param fd   webcam file descriptor.
      *  @return     0 if everthing's fine, 1 if not.
@@ -102,6 +100,7 @@ int frameRead(int fd)
     image.compressType(CompressionType(NoCompression));
     image.write(jpegFilename);
     start_hog(jpegFilename);
+    image.erase();
     if (xioctl(fd, VIDIOC_QBUF, &buf) == -1)
         perror("VIDIOC_QBUF");
     sleep(1);
@@ -200,7 +199,7 @@ int stop_record(int fd)
 
 int capture(void)
 {
-    int fd = open("/dev/video2", O_RDWR);
+    int fd = open("/dev/video1", O_RDWR);
     struct buffer *buffers = NULL;
     buffers = (struct buffer*)calloc(1, sizeof(buffer));
     //do checks and init buffers, format | return nbr buffers

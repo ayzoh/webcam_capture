@@ -17,7 +17,7 @@ HEADERS = webcam.h functions.h HOG/Affine.h HOG/Image.h HOG/HOG_Parameters.h HOG
 
 DOC = doxygen
 
-DOC_FILE = docs/config
+DOC_FILE = docs/config_html
 
 MAIN = exec_cpp
 
