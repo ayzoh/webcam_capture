@@ -21,6 +21,7 @@ void hog(string nom_fichier, int pattern[N_CLASSES][CELL_SIZE*CELL_SIZE])
     ifstream fichier(("img/"+nom_fichier+".pgm").c_str(), ios::in);
     if(!fichier) {
         cerr << "�a marche pas" << endl;
+        exit(1);
     }
     fichier >> magic_number >> large >> haut >> header;
 
@@ -100,7 +101,7 @@ void precision_inverse()
     cout << "Precision inverse : " << setw(3) << 100 - (100*compare/cpt) << "%" << endl;
 }
 
-int start_hog(char *filename) 
+int start_hog(char *jpegFilename) 
 {
 
     //A d�commenter pour visualiser la comparaison des r�sultats de
@@ -114,7 +115,8 @@ int start_hog(char *filename)
     string magic_number;
     int header;
     int pattern[N_CLASSES][CELL_SIZE*CELL_SIZE];
-    printf("%s\n", filename);
+    char *filename = jpegFilename;
+    //printf("%s\n", filename);
 
     for(int k = 0; k < N_CLASSES; k++) {
         stringstream ks;
@@ -145,7 +147,6 @@ int start_hog(char *filename)
 
     //fichiers trait�s ajout�s ou supprim�s si necesaire (les fichiers doivent
     //etre contenus dans ../img
-        printf("%s\n", filename);
     if (strstr(filename, ".pgm")) {
         char *dot = strchr(filename, '.');
         if (dot != NULL)

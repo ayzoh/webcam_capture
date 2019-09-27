@@ -86,6 +86,7 @@ int frameRead(int fd)
         }
     }
     //init timeval struct for .jpeg name update
+    const static char *filename = ".pgm";
     struct timeval timestamp = buf.timestamp;
     static uint32_t img_ind = 0;
     int64_t timestamp_long;
@@ -99,8 +100,11 @@ int frameRead(int fd)
     image.read(jpegFilename);
     image.compressType(CompressionType(NoCompression));
     image.write(jpegFilename);
-    start_hog(jpegFilename);
-    image.erase();
+    if (start_hog(jpegFilename) != 0)
+        return (1);
+    // remove file in /img to keep only histogramme in /res
+    strcat(jpegFilename, filename);
+    remove(jpegFilename);
     if (xioctl(fd, VIDIOC_QBUF, &buf) == -1)
         perror("VIDIOC_QBUF");
     sleep(1);
@@ -199,7 +203,7 @@ int stop_record(int fd)
 
 int capture(void)
 {
-    int fd = open("/dev/video1", O_RDWR);
+    int fd = open("/dev/video2", O_RDWR);
     struct buffer *buffers = NULL;
     buffers = (struct buffer*)calloc(1, sizeof(buffer));
     //do checks and init buffers, format | return nbr buffers
