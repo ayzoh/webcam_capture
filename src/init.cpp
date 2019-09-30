@@ -58,7 +58,7 @@ int check_capabilities(int fd)
 }
 
 /**
-     *  @brief Initialize fps option (not implemented yet)
+     *  @brief Initialize fps option
      * 
      *  @param fd   webcam file descriptor.
      *  @return     0 if everthing's fine, 1 if not.

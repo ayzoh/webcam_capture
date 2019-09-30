@@ -10,20 +10,22 @@
 
 using namespace std;
 
-/**
-     *  @brief main function
-     * 
-     *  @param ac   number of argument(s)
-     *  @param av   argument
-     *  @return     0 if everthing's fine, 1 if not.
-*/
+int usage(void)
+{
+     printf("%s\n", "Usage: ./capture [link_to record_device]");
+     printf("%s\n", "default: ./capture /dev/video0");
+     return (1);
+}
 
 int main(int ac, char **av)
 {
-    UNUSED(av);
-    if (ac != 1)
-        return (1);
-    if (capture() != 0)
-        return (1);
-    return (0);
+     if (ac == 1)
+          return (usage());
+     if (ac == 2) {
+          if (strcmp("-h\0", av[1]) == 0)
+               return (usage());
+          if (capture(av[1]) != 0)
+               return (1);
+     }
+     return (0);
 }

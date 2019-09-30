@@ -7,8 +7,10 @@
 
 #include "webcam.h"
 #include "functions.h"
+#include <Magick++.h>
 
 using namespace std;
+using namespace Magick;
 
 /// Capture loop variable. Change to 1 if Ctrl+C (SIGINT) is entered 
 int goon = 0;
@@ -19,7 +21,7 @@ static char* jpegFilename = name;
 /// Set to assembly and get enough space for the jpegFilename.
 static char* jpegFilenamePart = NULL;
 /// Set output format of the jpegFilename.
-static const char* const FilenameFmt = "%s_%010"PRIu32"_%"PRId64".jpeg";
+static const char* const FilenameFmt = "%s_%010"PRIu32"_%"PRId64".pgm";
 /// Saved framebuffer in init.cpp.
 const extern void *save;
 
@@ -55,14 +57,12 @@ void InstallSIGINTHandler()
 }
 
 /**
-     *  @brief Write in a .jpg the saved buffer(frame).
+     *  @brief Write in a .pgm the saved buffer (frame) every seconds.
      *
      *  @details
      *  the VIDIOC_DQBUF ioctl is used to dequeue a filled (capturing) or displayed
      *  (output) buffer from the driver’s outgoing queue.\n
-     *  The ofstream variable will be the final capture frame, with the jpegFilename which have been formatted before,
-     *  thank's to timeval (time value) struct, 32 and 64 bits int, and sprintf function.\n
-     *  A new buffer is after queued for the next frame.
+     *  The ofstream file is the jpg, that will be transformed in .pgm thank's to magick++ library
      * 
      *  @param fd   webcam file descriptor.
      *  @return     0 if everthing's fine, 1 if not.
@@ -72,6 +72,7 @@ int frameRead(int fd)
 {
     v4l2_buffer buf = {0};
     ofstream outFile;
+    Image image;
 
     CLEAR(buf);
     buf.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
@@ -85,6 +86,7 @@ int frameRead(int fd)
         }
     }
     //init timeval struct for .jpeg name update
+    const static char *filename = ".pgm";
     struct timeval timestamp = buf.timestamp;
     static uint32_t img_ind = 0;
     int64_t timestamp_long;
@@ -94,8 +96,18 @@ int frameRead(int fd)
     outFile.open(jpegFilename);
     outFile.write((char*)save, (double)buf.bytesused);
     outFile.close();
+    //compress .pgm in the ascii form
+    image.read(jpegFilename);
+    image.compressType(CompressionType(NoCompression));
+    image.write(jpegFilename);
+    if (start_hog(jpegFilename) != 0)
+        return (1);
+    // remove file in /img to keep only histogramme in /res
+    strcat(jpegFilename, filename);
+    remove(jpegFilename);
     if (xioctl(fd, VIDIOC_QBUF, &buf) == -1)
         perror("VIDIOC_QBUF");
+    sleep(1);
     return (0);
 }
 
@@ -189,9 +201,9 @@ int stop_record(int fd)
      *  @return 0 if everthing's fine, 1 if not.
 */
 
-int capture(void)
+int capture(char *device_link)
 {
-    int fd = open("/dev/video0", O_RDWR);
+    int fd = open(device_link, O_RDWR);
     struct buffer *buffers = NULL;
     buffers = (struct buffer*)calloc(1, sizeof(buffer));
     //do checks and init buffers, format | return nbr buffers
