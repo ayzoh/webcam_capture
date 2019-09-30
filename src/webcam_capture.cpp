@@ -201,9 +201,9 @@ int stop_record(int fd)
      *  @return 0 if everthing's fine, 1 if not.
 */
 
-int capture(void)
+int capture(char *device_link)
 {
-    int fd = open("/dev/video2", O_RDWR);
+    int fd = open(device_link, O_RDWR);
     struct buffer *buffers = NULL;
     buffers = (struct buffer*)calloc(1, sizeof(buffer));
     //do checks and init buffers, format | return nbr buffers
