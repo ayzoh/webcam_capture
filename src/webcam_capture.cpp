@@ -90,7 +90,7 @@ int frameRead(int fd)
     struct timeval timestamp = buf.timestamp;
     static uint32_t img_ind = 0;
     int64_t timestamp_long;
-    timestamp_long = timestamp.tv_sec*1e6 +  timestamp.tv_usec;
+    timestamp_long = timestamp.tv_sec*1e6 + timestamp.tv_usec;
     sprintf(jpegFilename,FilenameFmt,jpegFilenamePart,img_ind++,timestamp_long);
     //write in .jpeg (open create the .jpeg, write fill it, and close)
     outFile.open(jpegFilename);
@@ -102,7 +102,7 @@ int frameRead(int fd)
     image.write(jpegFilename);
     if (start_hog(jpegFilename) != 0)
         return (1);
-    // remove file in /img to keep only histogramme in /res
+    // remove file in /img to keep only histogram in /res
     strcat(jpegFilename, filename);
     remove(jpegFilename);
     if (xioctl(fd, VIDIOC_QBUF, &buf) == -1)

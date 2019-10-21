@@ -27,7 +27,6 @@
 #include <sys/ioctl.h>
 #include <asm/types.h>
 #include <linux/videodev2.h>
-#include <jpeglib.h>
 #include <libv4l2.h>
 #include <signal.h>
 #include <stdint.h>
