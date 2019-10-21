@@ -17,4 +17,4 @@ The "frame.pgm" is then erased in order to only keep the treated frame (res/fram
 /!\ Don't forget to install delegates libraries (e.g. libpng16, libjpeg62..) /!\
 
 
-This program has 2 ways of compilation, depending of your environment. Remove the one you don't need between Fedora or Ubuntu Makefile.
+This program has 2 ways of compilation, depending of your environment. Remove the one you don't need between Fedora or Ubuntu Makefile, and rename the one you need in "Makefile".
